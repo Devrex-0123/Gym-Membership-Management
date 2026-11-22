@@ -23,4 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Local environment files and secrets
+.env
+.env.*
 *.env
+!.env.example
+!.env.*.example
