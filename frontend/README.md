@@ -61,6 +61,14 @@ If you are developing a production application, we recommend using TypeScript wi
 5. Try duplicate names, a negative price, or a zero/fractional package duration and confirm the server rejects the update. A cashier attempting `PUT /api/settings/rates` should receive a forbidden response.
 6. From `backend`, run `npm test` for pricing controller and validation checks.
 
+## Testing admin expense tracking
+
+1. Sign in as an admin and open **Expenses**. Record an expense with a date, category, amount, description, and optional vendor. Confirm it appears in the expense history with the admin who recorded it.
+2. Filter the history by date range, category, description, or vendor. Confirm pagination and the empty-results message work.
+3. Try a zero/negative amount, invalid category, or malformed date through the API and confirm the server rejects it.
+4. Sign in as a cashier and try to load or create expenses. Both requests should be forbidden; member accounts should also be unable to access the module.
+5. From `backend`, run `npm test` to verify expense validation, filtering, pagination, and admin-only access.
+
 ## Testing transaction history and sales reports
 
 1. Sign in as a cashier and open **Transactions**. Confirm the list shows your transactions, with 20 rows per page and working Previous/Next controls.

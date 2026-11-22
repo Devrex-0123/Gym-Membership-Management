@@ -10,6 +10,7 @@ import RenewalReminders from './pages/RenewalReminders';
 import CashierDashboard from './pages/CashierDashboard';
 import CashierManagement from './pages/CashierManagement';
 import CashierDirectory from './pages/CashierDirectory';
+import ExpenseManagement from './pages/ExpenseManagement';
 import MemberManagement from './pages/MemberManagement';
 import MemberDirectory from './pages/MemberDirectory';
 import PointOfSale from './pages/PointOfSale';
@@ -55,6 +56,7 @@ function App() {
                         <Route path="cashiers" element={<CashierManagement />} />
                         <Route path="cashier-directory" element={<CashierDirectory />} />
                         <Route path="pricing" element={<PricingManagement />} />
+                        <Route path="expenses" element={<ExpenseManagement />} />
                         <Route path="reports" element={<AdminReports />} />
                         <Route path="attendance" element={<AdminAttendance />} />
                         <Route path="renewals" element={<RenewalReminders />} />

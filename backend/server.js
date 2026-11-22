@@ -23,6 +23,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/members', require('./routes/memberRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 app.use('/api/attendance', require('./routes/attendanceRoutes'));
+app.use('/api/expenses', require('./routes/expenseRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
 // ==========================================
 

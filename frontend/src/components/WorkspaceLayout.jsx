@@ -6,6 +6,7 @@ const WORKSPACE_NAVIGATION = {
         { label: 'Cashier accounts', to: '/admin/cashiers' },
         { label: 'Cashier directory', to: '/admin/cashier-directory' },
         { label: 'Pricing & plans', to: '/admin/pricing' },
+        { label: 'Expenses', to: '/admin/expenses' },
         { label: 'Renewals', to: '/admin/renewals' },
         { label: 'Reports', to: '/admin/reports' },
         { label: 'Attendance', to: '/admin/attendance' }
