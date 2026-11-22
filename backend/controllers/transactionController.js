@@ -4,9 +4,11 @@ const Transaction = require('../models/Transaction');
 const Member = require('../models/Member');
 const Settings = require('../models/Settings');
 const Staff = require('../models/Staff');
+const { Expense } = require('../models/Expense');
 
 const TRANSACTION_TYPES = ['walk_in', 'membership_new', 'membership_renewal'];
 const PAYMENT_METHODS = ['cash', 'gcash', 'paymaya', 'card'];
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const parseIsoDate = (value) => {
@@ -18,6 +20,12 @@ const parseIsoDate = (value) => {
         return null;
     }
     return date;
+};
+
+const isValidDateOnly = (value) => {
+    if (typeof value !== 'string' || !DATE_PATTERN.test(value)) return false;
+    const date = new Date(`${value}T00:00:00.000Z`);
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 };
 
 const parseDateRange = (query) => {
@@ -269,8 +277,21 @@ const getTransactionReport = async (req, res) => {
     if (dateError) {
         return res.status(400).json({ message: dateError });
     }
+    const { expenseStartDate, expenseEndDate } = req.query;
+    if ((expenseStartDate && !isValidDateOnly(expenseStartDate)) || (expenseEndDate && !isValidDateOnly(expenseEndDate))) {
+        return res.status(400).json({ message: 'Expense dates must use the valid YYYY-MM-DD format' });
+    }
+    if (expenseStartDate && expenseEndDate && expenseStartDate > expenseEndDate) {
+        return res.status(400).json({ message: 'Expense start date must be on or before end date' });
+    }
+    if (
+        Boolean(req.query.startDate) !== Boolean(expenseStartDate) ||
+        Boolean(req.query.endDate) !== Boolean(expenseEndDate)
+    ) {
+        return res.status(400).json({ message: 'Sales and expense date ranges must match' });
+    }
 
-    const [report] = await Transaction.aggregate([
+    const transactionPipeline = [
         { $match: filter },
         {
             $facet: {
@@ -353,19 +374,75 @@ const getTransactionReport = async (req, res) => {
                 ]
             }
         }
+    ];
+
+    const expenseFilter = {};
+    if (expenseStartDate || expenseEndDate) {
+        expenseFilter.expense_date = {};
+        if (expenseStartDate) expenseFilter.expense_date.$gte = expenseStartDate;
+        if (expenseEndDate) expenseFilter.expense_date.$lte = expenseEndDate;
+    }
+    const expensePipeline = [
+        { $match: expenseFilter },
+        {
+            $facet: {
+                summary: [
+                    {
+                        $group: {
+                            _id: null,
+                            total_expenses: { $sum: '$amount' },
+                            expense_count: { $sum: 1 }
+                        }
+                    },
+                    { $project: { _id: 0 } }
+                ],
+                by_category: [
+                    {
+                        $group: {
+                            _id: '$category',
+                            expense_count: { $sum: 1 },
+                            total_amount: { $sum: '$amount' }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            category: '$_id',
+                            expense_count: 1,
+                            total_amount: 1
+                        }
+                    },
+                    { $sort: { total_amount: -1 } }
+                ]
+            }
+        }
+    ];
+
+    const [[report], [expenseReport]] = await Promise.all([
+        Transaction.aggregate(transactionPipeline),
+        Expense.aggregate(expensePipeline)
     ]);
+    const transactionSummary = report?.summary[0] || {
+        total_revenue: 0,
+        transaction_count: 0,
+        total_walk_ins: 0,
+        total_new_members: 0,
+        total_renewals: 0
+    };
+    const expenseSummary = expenseReport?.summary[0] || { total_expenses: 0, expense_count: 0 };
+    const totalExpenses = Number(expenseSummary.total_expenses || 0);
 
     res.json({
-        summary: report?.summary[0] || {
-            total_revenue: 0,
-            transaction_count: 0,
-            total_walk_ins: 0,
-            total_new_members: 0,
-            total_renewals: 0
+        summary: {
+            ...transactionSummary,
+            total_expenses: totalExpenses,
+            expense_count: Number(expenseSummary.expense_count || 0),
+            net_profit: Number(transactionSummary.total_revenue || 0) - totalExpenses
         },
         by_cashier: report?.by_cashier || [],
         by_payment_method: report?.by_payment_method || [],
-        by_transaction_type: report?.by_transaction_type || []
+        by_transaction_type: report?.by_transaction_type || [],
+        by_expense_category: expenseReport?.by_category || []
     });
 };
 

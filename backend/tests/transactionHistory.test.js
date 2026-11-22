@@ -3,6 +3,7 @@ const { beforeEach, test } = require('node:test');
 
 const transactionPath = require.resolve('../models/Transaction');
 const staffPath = require.resolve('../models/Staff');
+const expensePath = require.resolve('../models/Expense');
 let findFilter;
 let countFilter;
 let aggregationPipeline;
@@ -10,6 +11,8 @@ let transactionResults;
 let aggregateResults;
 let totalTransactions;
 let queryOptions;
+let expenseAggregationPipeline;
+let expenseAggregateResults;
 
 const transactionQuery = {
     populate() { return this; },
@@ -37,6 +40,20 @@ require.cache[staffPath] = {
     exports: { collection: { name: 'staff' } }
 };
 
+require.cache[expensePath] = {
+    id: expensePath,
+    filename: expensePath,
+    loaded: true,
+    exports: {
+        Expense: {
+            aggregate: async (pipeline) => {
+                expenseAggregationPipeline = pipeline;
+                return expenseAggregateResults;
+            }
+        }
+    }
+};
+
 const { getTransactionHistory, getTransactionReport } = require('../controllers/transactionController');
 
 const createResponse = () => ({
@@ -59,6 +76,11 @@ beforeEach(() => {
     aggregateResults = [];
     totalTransactions = 41;
     queryOptions = {};
+    expenseAggregationPipeline = null;
+    expenseAggregateResults = [{
+        summary: [],
+        by_category: []
+    }];
 });
 
 test('cashier history scopes results, filters by date and paginates', async () => {
@@ -156,20 +178,51 @@ test('admin report aggregates totals and grouped summaries for the selected peri
         by_transaction_type: [{ transaction_type: 'walk_in', transaction_count: 1, total_revenue: 100 }]
     };
     aggregateResults = [expectedReport];
+    const expectedExpenseReport = {
+        summary: [{ total_expenses: 3000, expense_count: 2 }],
+        by_category: [{ category: 'utilities', expense_count: 2, total_amount: 3000 }]
+    };
+    expenseAggregateResults = [expectedExpenseReport];
     const res = createResponse();
     const startDate = '2026-03-01T00:00:00.000Z';
     const endDate = '2026-03-02T00:00:00.000Z';
 
-    await getTransactionReport({ query: { startDate, endDate } }, res);
+    await getTransactionReport({
+        query: {
+            startDate,
+            endDate,
+            expenseStartDate: '2026-03-01',
+            expenseEndDate: '2026-03-02'
+        }
+    }, res);
 
     assert.deepEqual(aggregationPipeline[0], {
         $match: { createdAt: { $gte: new Date(startDate), $lt: new Date(endDate) } }
     });
     assert.equal(aggregationPipeline[1].$facet.by_cashier[1].$lookup.from, 'staff');
-    assert.deepEqual(res.body.summary, expectedReport.summary[0]);
+    assert.deepEqual(expenseAggregationPipeline[0], {
+        $match: { expense_date: { $gte: '2026-03-01', $lte: '2026-03-02' } }
+    });
+    assert.equal(res.body.summary.total_revenue, 2600);
+    assert.equal(res.body.summary.total_expenses, 3000);
+    assert.equal(res.body.summary.expense_count, 2);
+    assert.equal(res.body.summary.net_profit, -400);
     assert.deepEqual(res.body.by_cashier, expectedReport.by_cashier);
     assert.deepEqual(res.body.by_payment_method, expectedReport.by_payment_method);
     assert.deepEqual(res.body.by_transaction_type, expectedReport.by_transaction_type);
+    assert.deepEqual(res.body.by_expense_category, expectedExpenseReport.by_category);
+
+    const invalidExpenseRange = createResponse();
+    await getTransactionReport({
+        query: { expenseStartDate: '2026-03-03', expenseEndDate: '2026-03-02' }
+    }, invalidExpenseRange);
+    assert.equal(invalidExpenseRange.statusCode, 400);
+
+    const mismatchedExpenseRange = createResponse();
+    await getTransactionReport({
+        query: { startDate, endDate }
+    }, mismatchedExpenseRange);
+    assert.equal(mismatchedExpenseRange.statusCode, 400);
 });
 
 test('admin report returns zero totals when the period has no transactions', async () => {
@@ -188,7 +241,11 @@ test('admin report returns zero totals when the period has no transactions', asy
         transaction_count: 0,
         total_walk_ins: 0,
         total_new_members: 0,
-        total_renewals: 0
+        total_renewals: 0,
+        total_expenses: 0,
+        expense_count: 0,
+        net_profit: 0
     });
     assert.deepEqual(res.body.by_cashier, []);
+    assert.deepEqual(res.body.by_expense_category, []);
 });

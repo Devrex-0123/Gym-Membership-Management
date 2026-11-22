@@ -73,9 +73,10 @@ If you are developing a production application, we recommend using TypeScript wi
 
 1. Sign in as a cashier and open **Transactions**. Confirm the list shows your transactions, with 20 rows per page and working Previous/Next controls.
 2. Search by transaction reference or category, then filter by date range, transaction type, and payment method. Confirm Clear restores the full history and an empty match displays a helpful message.
-3. Sign in as an admin and open **Reports**. The report defaults to today; select another period and confirm the totals and breakdowns by cashier, payment method, and transaction type update.
-4. Choose a period with no transactions and verify the report shows zero totals and empty breakdowns. Try a start date later than the end date and verify the API rejects the range.
-5. From `backend`, run `npm test` to verify history filtering, cashier scoping, pagination, date validation, and report aggregation.
+3. Sign in as an admin and open **Reports**. The report defaults to today; select another period and confirm the sales totals and breakdowns by cashier, payment method, and transaction type update.
+4. Record expenses in **Expenses** for dates in the selected period. Confirm Reports shows total expenses, net profit as revenue minus recorded expenses, and the expense breakdown by category. Expenses outside the selected period should not affect the totals.
+5. Choose a period with no sales or expenses and verify the report shows zero totals and empty breakdowns. Try a start date later than the end date and verify the API rejects the range.
+6. From `backend`, run `npm test` to verify history filtering, cashier scoping, pagination, date validation, report aggregation, and profit calculations.
 
 ## Testing member attendance and check-in
 

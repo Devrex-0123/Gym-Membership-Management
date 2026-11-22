@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import API from '../utils/api';
 import { getDateRangeParams, getTodayDateInput } from '../utils/dateRange';
 
-const formatCurrency = (amount) => `₱${Number(amount || 0).toLocaleString('en-PH', { maximumFractionDigits: 2 })}`;
+const currencyFormatter = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 2 });
+const formatCurrency = (amount) => currencyFormatter.format(Number(amount || 0));
 const TYPE_LABELS = {
     walk_in: 'Walk-in',
     membership_new: 'New membership',
@@ -33,7 +34,11 @@ const AdminReports = () => {
             setIsLoading(true);
             try {
                 const { data } = await API.get('/transactions/report', {
-                    params: getDateRangeParams(appliedFilters)
+                    params: {
+                        ...getDateRangeParams(appliedFilters),
+                        expenseStartDate: appliedFilters.startDate,
+                        expenseEndDate: appliedFilters.endDate
+                    }
                 });
                 setReport(data);
                 setError('');
@@ -58,8 +63,8 @@ const AdminReports = () => {
         <>
             <section>
                 <p className="text-sm font-bold uppercase tracking-[0.17em] text-[#B43F3F]">Admin module</p>
-                <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Sales reports</h1>
-                <p className="mt-2 text-sm text-[#173B45]/60">Review revenue and transaction activity across the gym.</p>
+                <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Sales and profit reports</h1>
+                <p className="mt-2 text-sm text-[#173B45]/60">Compare sales revenue with recorded operating expenses.</p>
             </section>
 
             <section className="rounded-2xl border border-[#173B45]/[0.06] bg-white p-5 shadow-sm sm:p-7">
@@ -88,8 +93,10 @@ const AdminReports = () => {
                 <p className="rounded-2xl bg-white px-5 py-8 text-sm text-[#173B45]/55 shadow-sm">Loading report…</p>
             ) : report && (
                 <>
-                    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         <MetricCard label="Total revenue" value={formatCurrency(summary.total_revenue)} detail="Recorded sales in period" />
+                        <MetricCard label="Total expenses" value={formatCurrency(summary.total_expenses)} detail={`${Number(summary.expense_count || 0).toLocaleString('en-PH')} recorded expense(s)`} />
+                        <MetricCard label="Net profit" value={formatCurrency(summary.net_profit)} detail="Revenue minus recorded expenses" />
                         <MetricCard label="Transactions" value={Number(summary.transaction_count || 0).toLocaleString('en-PH')} detail="Completed transactions" />
                         <MetricCard label="Walk-ins" value={Number(summary.total_walk_ins || 0).toLocaleString('en-PH')} detail="Walk-in sales" />
                         <MetricCard label="Memberships" value={(Number(summary.total_new_members || 0) + Number(summary.total_renewals || 0)).toLocaleString('en-PH')} detail={`${summary.total_new_members || 0} new · ${summary.total_renewals || 0} renewals`} />
@@ -123,6 +130,20 @@ const AdminReports = () => {
                                 </>
                             )}
                             rowKey={(row) => row.payment_method}
+                        />
+                        <ReportTable
+                            title="Expenses by category"
+                            columns={['Category', 'Records', 'Amount']}
+                            rows={report.by_expense_category}
+                            emptyMessage="No expenses recorded in this period."
+                            renderRow={(row) => (
+                                <>
+                                    <td className="px-5 py-4 font-semibold capitalize">{row.category}</td>
+                                    <td className="px-5 py-4">{Number(row.expense_count).toLocaleString('en-PH')}</td>
+                                    <td className="px-5 py-4 text-right font-bold">{formatCurrency(row.total_amount)}</td>
+                                </>
+                            )}
+                            rowKey={(row) => row.category}
                         />
                         <ReportTable
                             title="Sales by transaction type"
