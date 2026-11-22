@@ -32,9 +32,17 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Testing role modules
 
-1. Sign in as an admin. Verify the Overview contains the daily summary and Cashier accounts has the staff creation form.
-2. Sign in as a cashier. Verify Overview links to Members, Check-in, Renewals, Walk-in POS, and Transactions, and each module opens its own page from the navigation.
-3. Use the browser address bar to open `/admin/cashiers` as a cashier and `/cashier/members` as a logged-out user. Both should redirect to the login page.
+1. Sign in as an admin. Verify the Overview contains the daily summary, Cashier accounts has the staff creation form, and Cashier directory lists existing cashier accounts.
+2. Sign in as a cashier. Verify Overview links to Member services, Member directory, Check-in, Renewals, Walk-in POS, and Transactions, and each module opens its own page from the navigation.
+3. Use the browser address bar to open `/admin/cashiers` as a cashier and `/cashier/member-directory` as an admin or member. They should be denied access.
+
+## Testing role-based directories
+
+1. As an admin, open **Cashier directory**. Search by name or username and filter active/inactive accounts. Confirm only cashier accounts are shown, pagination works, and no password data is displayed.
+2. Use **Add cashier** to create an account, return to the directory, and confirm the new account appears. The staff list endpoint must reject cashier and member tokens.
+3. As a cashier, open **Member directory**. Browse members, search by name/phone/code, and filter active, expiring soon, expired, or no membership. Confirm expiry, last visit, and blacklist status display correctly.
+4. Confirm the directory is paginated, excludes member passwords, and cannot be accessed with an admin or member token. Member registration and membership sales should remain in the separate **Member services** module.
+5. From `backend`, run `npm test` to verify directory filtering, pagination, safe fields, and role gates.
 
 ## Testing the member portal
 

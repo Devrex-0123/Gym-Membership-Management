@@ -66,4 +66,12 @@ const adminOnly = (req, res, next) => {
     }
 };
 
-module.exports = { protect, memberProtect, adminOnly };
+const cashierOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'cashier') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Not authorized as cashier' });
+    }
+};
+
+module.exports = { protect, memberProtect, adminOnly, cashierOnly };

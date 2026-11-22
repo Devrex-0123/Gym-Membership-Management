@@ -4,6 +4,7 @@ const WORKSPACE_NAVIGATION = {
     admin: [
         { label: 'Overview', to: '/admin/dashboard', end: true },
         { label: 'Cashier accounts', to: '/admin/cashiers' },
+        { label: 'Cashier directory', to: '/admin/cashier-directory' },
         { label: 'Pricing & plans', to: '/admin/pricing' },
         { label: 'Renewals', to: '/admin/renewals' },
         { label: 'Reports', to: '/admin/reports' },
@@ -11,7 +12,8 @@ const WORKSPACE_NAVIGATION = {
     ],
     cashier: [
         { label: 'Overview', to: '/cashier/dashboard', end: true },
-        { label: 'Members', to: '/cashier/members' },
+        { label: 'Member services', to: '/cashier/members' },
+        { label: 'Member directory', to: '/cashier/member-directory', allowedRoles: ['cashier'] },
         { label: 'Check-in', to: '/cashier/check-in' },
         { label: 'Renewals', to: '/cashier/renewals' },
         { label: 'Walk-in POS', to: '/cashier/point-of-sale' },
@@ -29,6 +31,9 @@ const WorkspaceLayout = ({ role }) => {
             return null;
         }
     })();
+    const navigation = WORKSPACE_NAVIGATION[role].filter(
+        (item) => !item.allowedRoles || item.allowedRoles.includes(userInfo?.role)
+    );
 
     const handleLogout = () => {
         localStorage.removeItem('userInfo');
@@ -61,7 +66,7 @@ const WorkspaceLayout = ({ role }) => {
                 </div>
                 <nav aria-label={`${role} modules`} className="border-t border-white/10">
                     <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-8">
-                        {WORKSPACE_NAVIGATION[role].map((item) => (
+                        {navigation.map((item) => (
                             <NavLink
                                 key={item.to}
                                 to={item.to}

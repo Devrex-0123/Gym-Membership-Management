@@ -9,14 +9,16 @@ import AdminAttendance from './pages/AdminAttendance';
 import RenewalReminders from './pages/RenewalReminders';
 import CashierDashboard from './pages/CashierDashboard';
 import CashierManagement from './pages/CashierManagement';
+import CashierDirectory from './pages/CashierDirectory';
 import MemberManagement from './pages/MemberManagement';
+import MemberDirectory from './pages/MemberDirectory';
 import PointOfSale from './pages/PointOfSale';
 import TransactionHistory from './pages/TransactionHistory';
 import CheckIn from './pages/CheckIn';
 import WorkspaceLayout from './components/WorkspaceLayout';
 
 // Simple Protected Route wrapper
-const ProtectedRoute = ({ children, allowedRoles }) => {
+const ProtectedRoute = ({ children, allowedRoles, redirectTo = '/' }) => {
     let userInfo = null;
 
     try {
@@ -31,7 +33,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     }
     
     if (allowedRoles && !allowedRoles.includes(userInfo.role)) {
-        return <Navigate to="/" replace />;
+        return <Navigate to={redirectTo} replace />;
     }
 
     return children || <Outlet />;
@@ -51,6 +53,7 @@ function App() {
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={<AdminDashboard />} />
                         <Route path="cashiers" element={<CashierManagement />} />
+                        <Route path="cashier-directory" element={<CashierDirectory />} />
                         <Route path="pricing" element={<PricingManagement />} />
                         <Route path="reports" element={<AdminReports />} />
                         <Route path="attendance" element={<AdminAttendance />} />
@@ -62,6 +65,9 @@ function App() {
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={<CashierDashboard />} />
                         <Route path="members" element={<MemberManagement />} />
+                        <Route element={<ProtectedRoute allowedRoles={['cashier']} redirectTo="/admin/dashboard" />}>
+                            <Route path="member-directory" element={<MemberDirectory />} />
+                        </Route>
                         <Route path="check-in" element={<CheckIn />} />
                         <Route path="renewals" element={<RenewalReminders />} />
                         <Route path="point-of-sale" element={<PointOfSale />} />
