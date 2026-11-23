@@ -10,7 +10,7 @@ const TRANSACTION_TYPES = [
     { value: 'membership_renewal', label: 'Renewal' }
 ];
 const PAYMENT_METHODS = ['cash', 'gcash', 'paymaya', 'card'];
-const INPUT_CLASS = 'w-full rounded-xl border border-[#173B45]/15 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-[#FF8225] focus:ring-4 focus:ring-[#FF8225]/10';
+const INPUT_CLASS = 'w-full rounded-md border border-neutral-200 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-1 focus:ring-neutral-900';
 
 const TransactionHistory = () => {
     const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -68,21 +68,20 @@ const TransactionHistory = () => {
         <>
             <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.17em] text-[#B43F3F]">Cashier module</p>
-                    <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Transaction history</h1>
-                    <p className="mt-2 text-sm text-[#173B45]/60">Search and filter recorded transactions by date, type, or payment method.</p>
+                    <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Transaction history</h1>
+                    <p className="mt-2 text-sm text-neutral-500">Search and filter recorded transactions by date, type, or payment method.</p>
                 </div>
-                <button type="button" onClick={refreshTransactions} disabled={isLoading} className="w-fit rounded-xl border border-[#173B45]/15 bg-white px-4 py-2.5 text-sm font-bold transition hover:border-[#FF8225] disabled:opacity-50">
+                <button type="button" onClick={refreshTransactions} disabled={isLoading} className="w-fit rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold transition hover:border-neutral-400 disabled:opacity-50">
                     {isLoading ? 'Loading…' : 'Refresh'}
                 </button>
             </section>
 
-            {error && <p role="alert" className="rounded-xl border border-[#B43F3F]/20 bg-white px-4 py-3 text-sm font-medium text-[#B43F3F] shadow-sm">{error}</p>}
+            {error && <p role="alert" className="rounded-md border border-red-200 bg-white px-4 py-3 text-sm font-medium text-red-600">{error}</p>}
 
-            <section className="rounded-2xl border border-[#173B45]/[0.06] bg-white p-5 shadow-sm sm:p-7">
+            <section className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-7">
                 <div className="mb-5">
-                    <h2 className="text-lg font-black">Find transactions</h2>
-                    <p className="mt-1 text-sm text-[#173B45]/55">Results are scoped to your cashier account when signed in as a cashier.</p>
+                    <h2 className="text-lg font-semibold">Find transactions</h2>
+                    <p className="mt-1 text-sm text-neutral-500">Results are scoped to your cashier account when signed in as a cashier.</p>
                 </div>
                 <form onSubmit={applyFilters} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="sm:col-span-2 lg:col-span-3">
@@ -120,44 +119,43 @@ const TransactionHistory = () => {
                         </select>
                     </div>
                     <div className="flex items-end gap-3 sm:col-span-2 lg:col-span-3">
-                        <button type="submit" className="rounded-xl bg-[#FF8225] px-5 py-3 font-bold text-[#173B45] transition hover:bg-[#f77718]">Apply filters</button>
-                        <button type="button" onClick={clearFilters} className="rounded-xl border border-[#173B45]/15 bg-white px-5 py-3 text-sm font-bold transition hover:border-[#FF8225]">Clear</button>
+                        <button type="submit" className="rounded-md bg-neutral-900 text-white px-5 py-3 font-semibold transition hover:bg-neutral-700">Apply filters</button>
+                        <button type="button" onClick={clearFilters} className="rounded-md border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold transition hover:border-neutral-400">Clear</button>
                     </div>
                 </form>
             </section>
 
-            <section className="overflow-hidden rounded-2xl border border-[#173B45]/[0.06] bg-white shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#173B45]/[0.07] px-5 py-4 sm:px-7">
+            <section className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-4 sm:px-7">
                     <div>
-                        <h2 className="font-black">Results</h2>
-                        <p className="mt-1 text-sm text-[#173B45]/55">{isLoading ? 'Loading…' : `${pagination.total.toLocaleString('en-PH')} transaction(s)`}</p>
+                        <h2 className="font-semibold">Results</h2>
+                        <p className="mt-1 text-sm text-neutral-500">{isLoading ? 'Loading…' : `${pagination.total.toLocaleString('en-PH')} transaction(s)`}</p>
                     </div>
-                    <span className="rounded-full bg-[#F8EDED] px-3 py-1 text-xs font-bold text-[#B43F3F]">HISTORY</span>
                 </div>
 
                 {isLoading ? (
-                    <p className="px-5 py-8 text-sm text-[#173B45]/55 sm:px-7">Loading transactions…</p>
+                    <p className="px-5 py-8 text-sm text-neutral-500 sm:px-7">Loading transactions…</p>
                 ) : transactions.length === 0 ? (
-                    <p className="px-5 py-8 text-sm text-[#173B45]/55 sm:px-7">No transactions match these filters.</p>
+                    <p className="px-5 py-8 text-sm text-neutral-500 sm:px-7">No transactions match these filters.</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[850px] text-left text-sm">
-                            <thead className="bg-[#F8EDED]/55 text-xs uppercase tracking-wide text-[#173B45]/55">
+                            <thead className="bg-neutral-50 text-xs text-neutral-500">
                                 <tr>
-                                    <th className="px-5 py-3 font-bold sm:px-7">Date & time</th>
-                                    <th className="px-5 py-3 font-bold">Reference</th>
-                                    <th className="px-5 py-3 font-bold">Customer</th>
-                                    <th className="px-5 py-3 font-bold">Category</th>
-                                    <th className="px-5 py-3 font-bold">Type</th>
-                                    <th className="px-5 py-3 font-bold">Cashier</th>
-                                    <th className="px-5 py-3 font-bold">Payment</th>
-                                    <th className="px-5 py-3 text-right font-bold sm:px-7">Amount</th>
+                                    <th className="px-5 py-3 font-semibold sm:px-7">Date & time</th>
+                                    <th className="px-5 py-3 font-semibold">Reference</th>
+                                    <th className="px-5 py-3 font-semibold">Customer</th>
+                                    <th className="px-5 py-3 font-semibold">Category</th>
+                                    <th className="px-5 py-3 font-semibold">Type</th>
+                                    <th className="px-5 py-3 font-semibold">Cashier</th>
+                                    <th className="px-5 py-3 font-semibold">Payment</th>
+                                    <th className="px-5 py-3 text-right font-semibold sm:px-7">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#173B45]/[0.06]">
+                            <tbody className="divide-y divide-neutral-200">
                                 {transactions.map((transaction) => (
-                                    <tr key={transaction._id} className="hover:bg-[#F8EDED]/25">
-                                        <td className="whitespace-nowrap px-5 py-4 text-[#173B45]/65 sm:px-7">
+                                    <tr key={transaction._id} className="hover:bg-neutral-100">
+                                        <td className="whitespace-nowrap px-5 py-4 text-neutral-500 sm:px-7">
                                             {new Date(transaction.createdAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}
                                         </td>
                                         <td className="whitespace-nowrap px-5 py-4 font-mono text-xs font-semibold">{transaction.transaction_code}</td>
@@ -165,10 +163,10 @@ const TransactionHistory = () => {
                                             {transaction.member_id ? `${transaction.member_id.first_name} ${transaction.member_id.last_name}` : 'Walk-in'}
                                         </td>
                                         <td className="whitespace-nowrap px-5 py-4">{transaction.category_name}</td>
-                                        <td className="whitespace-nowrap px-5 py-4 capitalize text-[#173B45]/65">{transaction.transaction_type.replace(/_/g, ' ')}</td>
+                                        <td className="whitespace-nowrap px-5 py-4 capitalize text-neutral-500">{transaction.transaction_type.replace(/_/g, ' ')}</td>
                                         <td className="whitespace-nowrap px-5 py-4">{transaction.cashier_id?.full_name || 'Unknown'}</td>
-                                        <td className="whitespace-nowrap px-5 py-4 uppercase text-[#173B45]/65">{transaction.payment_method}</td>
-                                        <td className="whitespace-nowrap px-5 py-4 text-right font-black sm:px-7">₱{Number(transaction.amount).toLocaleString('en-PH')}</td>
+                                        <td className="whitespace-nowrap px-5 py-4 text-neutral-500">{transaction.payment_method}</td>
+                                        <td className="whitespace-nowrap px-5 py-4 text-right font-semibold sm:px-7">₱{Number(transaction.amount).toLocaleString('en-PH')}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -176,11 +174,11 @@ const TransactionHistory = () => {
                     </div>
                 )}
 
-                <div className="flex items-center justify-between gap-3 border-t border-[#173B45]/[0.07] px-5 py-4 sm:px-7">
-                    <p className="text-sm text-[#173B45]/55">Page {page} of {Math.max(pagination.totalPages, 1)}</p>
+                <div className="flex items-center justify-between gap-3 border-t border-neutral-200 px-5 py-4 sm:px-7">
+                    <p className="text-sm text-neutral-500">Page {page} of {Math.max(pagination.totalPages, 1)}</p>
                     <div className="flex gap-2">
-                        <button type="button" disabled={isLoading || page <= 1} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-[#173B45]/15 px-3 py-2 text-sm font-semibold disabled:opacity-40">Previous</button>
-                        <button type="button" disabled={isLoading || page >= pagination.totalPages} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-[#173B45]/15 px-3 py-2 text-sm font-semibold disabled:opacity-40">Next</button>
+                        <button type="button" disabled={isLoading || page <= 1} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold disabled:opacity-40">Previous</button>
+                        <button type="button" disabled={isLoading || page >= pagination.totalPages} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold disabled:opacity-40">Next</button>
                     </div>
                 </div>
             </section>

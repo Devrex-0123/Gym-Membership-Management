@@ -63,6 +63,45 @@ const getRates = async (req, res) => {
     res.json(serializeRates(settings, req.user.role === 'admin'));
 };
 
+const getPublicMembershipRates = async (req, res) => {
+    const settings = await Settings.findOne().select('membership_rates');
+
+    if (!settings) {
+        return res.status(404).json({ message: 'Membership plans are not configured' });
+    }
+
+    res.json({
+        membership_rates: settings.membership_rates
+            .filter(rate => rate.is_active)
+            .map(({ package_name, duration_days, price }) => ({
+                package_name,
+                duration_days,
+                price
+            }))
+    });
+};
+
+const getPublicRates = async (req, res) => {
+    const settings = await Settings.findOne().select('walk_in_rates membership_rates');
+
+    if (!settings) {
+        return res.status(404).json({ message: 'Gym pricing is not configured' });
+    }
+
+    res.json({
+        walk_in_rates: settings.walk_in_rates
+            .filter(rate => rate.is_active)
+            .map(({ category_name, price }) => ({ category_name, price })),
+        membership_rates: settings.membership_rates
+            .filter(rate => rate.is_active)
+            .map(({ package_name, duration_days, price }) => ({
+                package_name,
+                duration_days,
+                price
+            }))
+    });
+};
+
 const updateRates = async (req, res) => {
     if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
         return res.status(400).json({ message: 'Pricing settings must be provided as an object' });
@@ -99,4 +138,4 @@ const updateRates = async (req, res) => {
     res.json(serializeRates(settings, true));
 };
 
-module.exports = { getRates, updateRates };
+module.exports = { getRates, getPublicMembershipRates, getPublicRates, updateRates };

@@ -5,16 +5,16 @@
 body {
   min-width: 320px;
   margin: 0;
-  background-color: #F8EDED;
-  color: #173B45;
+  background-color: #fff;
+  color: #171717;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  color: #173B45;
-  background: rgb(255 130 37 / 35%);
+  color: #fff;
+  background: #171717;
 }
 
 button,

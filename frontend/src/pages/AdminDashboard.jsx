@@ -28,65 +28,56 @@ const AdminDashboard = () => {
     }
 
     const stats = [
-        { label: 'Total revenue', value: summary ? `₱${Number(summary.total_revenue).toLocaleString('en-PH')}` : '—', accent: 'bg-[#FF8225]', icon: '₱' },
-        { label: 'Walk-ins', value: summary?.total_walk_ins ?? '—', accent: 'bg-[#B43F3F]', icon: '↗' },
-        { label: 'New memberships', value: summary?.total_new_members ?? '—', accent: 'bg-[#173B45]', icon: '+' },
-        { label: 'Renewals', value: summary?.total_renewals ?? '—', accent: 'bg-[#FF8225]', icon: '↻' }
+        { label: 'Revenue', value: summary ? `₱${Number(summary.total_revenue).toLocaleString('en-PH')}` : '—' },
+        { label: 'Walk-ins', value: summary?.total_walk_ins ?? '—' },
+        { label: 'New memberships', value: summary?.total_new_members ?? '—' },
+        { label: 'Renewals', value: summary?.total_renewals ?? '—' }
+    ];
+
+    const shortcuts = [
+        { label: 'Cashier accounts', to: '/admin/cashiers' },
+        { label: 'Pricing & plans', to: '/admin/pricing' },
+        { label: 'Reports', to: '/admin/reports' },
+        { label: 'Renewals', to: '/admin/renewals' }
     ];
 
     return (
         <>
-            <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <section className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
                 <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.17em] text-[#B43F3F]">Admin overview</p>
-                    <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Good day, {firstName}.</h1>
-                    <p className="mt-2 text-sm text-[#173B45]/60">A quick look at today’s gym activity.</p>
+                    <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Good day, {firstName}.</h1>
+                    <p className="mt-2 text-sm text-neutral-500">Today’s gym activity.</p>
                 </div>
-                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#173B45]/10 bg-white/70 px-4 py-2 text-sm font-medium text-[#173B45]/70">
-                    <span className="h-2 w-2 rounded-full bg-[#FF8225]" />
+                <p className="text-sm text-neutral-500">
                     {new Date().toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' })}
-                </div>
+                </p>
             </section>
 
             <section aria-label="Today's gym summary">
-                <div className="mb-4">
-                    <h2 className="text-lg font-bold">Today at a glance</h2>
-                    <p className="mt-1 text-sm text-[#173B45]/55">Live transaction totals for your gym</p>
-                </div>
-                {summaryError && <p role="alert" className="mb-4 rounded-xl border border-[#B43F3F]/20 bg-white px-4 py-3 text-sm text-[#B43F3F]">{summaryError}</p>}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {summaryError && <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{summaryError}</p>}
+                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-neutral-200 bg-neutral-200 xl:grid-cols-4">
                     {stats.map((stat) => (
-                        <article key={stat.label} className="relative overflow-hidden rounded-2xl border border-[#173B45]/[0.06] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-[#173B45]/[0.07]">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-[#173B45]/55">{stat.label}</p>
-                                    <p className="mt-4 text-3xl font-black tracking-tight">{summary ? stat.value : '—'}</p>
-                                </div>
-                                <span className={`${stat.accent} grid h-11 w-11 place-items-center rounded-xl text-lg font-black text-white`}>{stat.icon}</span>
-                            </div>
-                            <p className="mt-3 text-xs font-medium text-[#173B45]/45">{summary ? 'Today' : summaryError ? 'Summary unavailable' : 'Loading today’s totals…'}</p>
-                            <div className={`absolute bottom-0 left-0 h-1 w-full ${stat.accent}`} />
-                        </article>
+                        <div key={stat.label} className="bg-white p-5">
+                            <p className="text-sm text-neutral-500">{stat.label}</p>
+                            <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight">{summary ? stat.value : '—'}</p>
+                        </div>
                     ))}
                 </div>
+                <p className="mt-3 text-xs text-neutral-400">{summary ? 'Totals for today' : summaryError ? 'Summary unavailable' : 'Loading today’s totals…'}</p>
             </section>
 
-            <section className="grid gap-5 md:grid-cols-2">
-                <Link to="/admin/cashiers" className="group rounded-2xl bg-[#173B45] p-6 text-white shadow-lg shadow-[#173B45]/10 transition hover:-translate-y-1">
-                    <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FFB276]">Team access</p>
-                            <h2 className="mt-3 text-xl font-black">Cashier accounts</h2>
-                            <p className="mt-2 max-w-sm text-sm leading-6 text-white/65">Create staff accounts and assign shifts from the dedicated team module.</p>
-                        </div>
-                        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#FF8225] text-xl font-bold text-[#173B45] transition group-hover:translate-x-1">→</span>
-                    </div>
-                </Link>
-                <div className="rounded-2xl border border-[#173B45]/[0.06] bg-white p-6 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B43F3F]">Workspace</p>
-                    <h2 className="mt-3 text-xl font-black">Your admin tools, organized.</h2>
-                    <p className="mt-2 text-sm leading-6 text-[#173B45]/60">Use the module navigation above to move between gym overview and staff account management.</p>
-                </div>
+            <section>
+                <h2 className="text-sm font-medium text-neutral-500">Shortcuts</h2>
+                <ul className="mt-3 divide-y divide-neutral-200 border-y border-neutral-200">
+                    {shortcuts.map((item) => (
+                        <li key={item.to}>
+                            <Link to={item.to} className="flex items-center justify-between py-3 text-sm transition-colors hover:text-neutral-500">
+                                {item.label}
+                                <span aria-hidden="true" className="text-neutral-400">→</span>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             </section>
         </>
     );

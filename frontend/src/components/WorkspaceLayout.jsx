@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 
 const WORKSPACE_NAVIGATION = {
     admin: [
@@ -22,6 +23,11 @@ const WORKSPACE_NAVIGATION = {
     ]
 };
 
+const navLinkClass = ({ isActive }) =>
+    `block whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors ${
+        isActive ? 'bg-neutral-100 font-medium text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+    }`;
+
 const WorkspaceLayout = ({ role }) => {
     const navigate = useNavigate();
     const userInfo = (() => {
@@ -38,51 +44,64 @@ const WorkspaceLayout = ({ role }) => {
 
     const handleLogout = () => {
         localStorage.removeItem('userInfo');
-        navigate('/');
+        navigate('/staff/login');
     };
 
+    const userName = userInfo?.full_name || role;
+    const userRole = userInfo?.role || role;
+
     return (
-        <div className="min-h-screen bg-[#F8EDED] text-[#173B45]">
-            <header className="bg-[#173B45] text-white shadow-lg shadow-[#173B45]/10">
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-8">
-                    <div className="flex items-center gap-3">
-                        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#FF8225] font-black text-[#173B45]">GY</div>
-                        <div>
-                            <p className="font-bold tracking-tight">Forge Fitness</p>
-                            <p className="text-xs capitalize text-white/55">{role} workspace</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 sm:gap-5">
-                        <div className="hidden text-right sm:block">
-                            <p className="text-sm font-semibold">{userInfo?.full_name || role}</p>
-                            <p className="text-xs capitalize text-white/55">{userInfo?.role || role}</p>
-                        </div>
-                        <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10 font-bold text-[#FFB276]">
-                            {(userInfo?.full_name || role).charAt(0).toUpperCase()}
-                        </div>
-                        <button onClick={handleLogout} className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold transition hover:border-[#FF8225] hover:bg-white/5">
-                            Log out
-                        </button>
-                    </div>
+        <div className="min-h-screen bg-white text-neutral-900 lg:flex">
+            {/* Desktop sidebar */}
+            <aside className="hidden w-60 shrink-0 flex-col border-r border-neutral-200 lg:sticky lg:top-0 lg:flex lg:h-screen">
+                <div className="px-6 py-6">
+                    <BrandLogo subtitle={`${role} workspace`} />
                 </div>
-                <nav aria-label={`${role} modules`} className="border-t border-white/10">
-                    <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-8">
-                        {navigation.map((item) => (
-                            <NavLink
-                                key={item.to}
-                                to={item.to}
-                                end={item.end}
-                                className={({ isActive }) => `whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition ${isActive ? 'bg-[#FF8225] text-[#173B45]' : 'text-white/70 hover:bg-white/[0.08] hover:text-white'}`}
-                            >
-                                {item.label}
-                            </NavLink>
-                        ))}
-                    </div>
+                <nav aria-label={`${role} modules`} className="flex-1 space-y-0.5 overflow-y-auto px-3">
+                    {navigation.map((item) => (
+                        <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
+                            {item.label}
+                        </NavLink>
+                    ))}
+                </nav>
+                <div className="border-t border-neutral-200 px-6 py-5">
+                    <p className="truncate text-sm font-medium">{userName}</p>
+                    <p className="text-xs capitalize text-neutral-500">{userRole}</p>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="mt-3 text-sm text-neutral-500 transition-colors hover:text-neutral-900"
+                    >
+                        Log out
+                    </button>
+                </div>
+            </aside>
+
+            {/* Mobile header */}
+            <header className="border-b border-neutral-200 lg:hidden">
+                <div className="flex items-center justify-between px-4 py-4 sm:px-6">
+                    <BrandLogo subtitle={`${role} workspace`} />
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="text-sm text-neutral-500 transition-colors hover:text-neutral-900"
+                    >
+                        Log out
+                    </button>
+                </div>
+                <nav aria-label={`${role} modules`} className="flex gap-1 overflow-x-auto px-2 pb-3 sm:px-4">
+                    {navigation.map((item) => (
+                        <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
+                            {item.label}
+                        </NavLink>
+                    ))}
                 </nav>
             </header>
-            <main className="mx-auto max-w-7xl space-y-8 px-4 py-7 sm:px-8 sm:py-9">
-                <Outlet />
-                <footer className="pb-2 text-center text-xs text-[#173B45]/40">Forge Fitness · {role} workspace</footer>
+
+            <main className="min-w-0 flex-1">
+                <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );

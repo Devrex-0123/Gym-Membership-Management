@@ -17,7 +17,7 @@ require.cache[settingsPath] = {
     }
 };
 
-const { getRates, updateRates } = require('../controllers/settingsController');
+const { getRates, getPublicMembershipRates, getPublicRates, updateRates } = require('../controllers/settingsController');
 
 const createResponse = () => ({
     statusCode: 200,
@@ -62,6 +62,53 @@ test('admin rate reads include inactive entries for editing', async () => {
 
     assert.equal(res.body.walk_in_rates.length, 2);
     assert.equal(res.body.membership_rates.length, 2);
+});
+
+test('public membership plan reads include only active plan details', async () => {
+    const res = createResponse();
+
+    await getPublicMembershipRates({}, res);
+
+    assert.deepEqual(res.body, {
+        membership_rates: [
+            { package_name: 'Monthly', duration_days: 30, price: 1500 }
+        ]
+    });
+});
+
+test('public membership plan reads report missing pricing configuration', async () => {
+    settings = null;
+    const res = createResponse();
+
+    await getPublicMembershipRates({}, res);
+
+    assert.equal(res.statusCode, 404);
+    assert.deepEqual(res.body, { message: 'Membership plans are not configured' });
+});
+
+test('public rates include only active walk-in and membership details', async () => {
+    const res = createResponse();
+
+    await getPublicRates({}, res);
+
+    assert.deepEqual(res.body, {
+        walk_in_rates: [
+            { category_name: 'Morning Promo', price: 50 }
+        ],
+        membership_rates: [
+            { package_name: 'Monthly', duration_days: 30, price: 1500 }
+        ]
+    });
+});
+
+test('public rates report missing settings', async () => {
+    settings = null;
+    const res = createResponse();
+
+    await getPublicRates({}, res);
+
+    assert.equal(res.statusCode, 404);
+    assert.deepEqual(res.body, { message: 'Gym pricing is not configured' });
 });
 
 test('admin rate updates persist validated walk-in and membership settings', async () => {

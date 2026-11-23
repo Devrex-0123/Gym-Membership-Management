@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
 import MemberLogin from './pages/MemberLogin';
 import MemberDashboard from './pages/MemberDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -45,11 +46,12 @@ function App() {
         <Router>
             <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/staff/login" element={<Login />} />
                 <Route path="/member/login" element={<MemberLogin />} />
                 
                 {/* Protected Routes */}
-                <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                <Route element={<ProtectedRoute allowedRoles={['admin']} redirectTo="/staff/login" />}>
                     <Route path="/admin" element={<WorkspaceLayout role="admin" />}>
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={<AdminDashboard />} />
@@ -62,7 +64,7 @@ function App() {
                         <Route path="renewals" element={<RenewalReminders />} />
                     </Route>
                 </Route>
-                <Route element={<ProtectedRoute allowedRoles={['cashier', 'admin']} />}>
+                <Route element={<ProtectedRoute allowedRoles={['cashier', 'admin']} redirectTo="/staff/login" />}>
                     <Route path="/cashier" element={<WorkspaceLayout role="cashier" />}>
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={<CashierDashboard />} />
@@ -76,7 +78,7 @@ function App() {
                         <Route path="transactions" element={<TransactionHistory />} />
                     </Route>
                 </Route>
-                <Route element={<ProtectedRoute allowedRoles={['member']} />}>
+                <Route element={<ProtectedRoute allowedRoles={['member']} redirectTo="/member/login" />}>
                     <Route path="/member/dashboard" element={<MemberDashboard />} />
                 </Route>
             </Routes>

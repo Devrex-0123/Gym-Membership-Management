@@ -95,3 +95,12 @@ If you are developing a production application, we recommend using TypeScript wi
 4. Renew a member’s membership and reload. The new expiry should have its own reminder status; the old reminder must not mark the renewed membership as contacted.
 5. Confirm members with no membership and blacklisted members are not included. Verify a member token cannot access the staff renewal endpoints.
 6. From `backend`, run `npm test` to verify renewal filtering, last-visit/reminder data, and idempotent reminder recording.
+
+## Testing the public landing page
+
+1. Start the backend with the MongoDB settings configured, then start the frontend and open `/`.
+2. Verify the compact header shows the Memberships, Promotions, and Member experience tabs alongside member and staff sign-in links.
+3. Select each tab and use the previous/next controls. Confirm content changes in place, there is no autoplay, and keyboard arrows/Home/End switch tabs.
+4. Verify the Memberships slide lists active packages and the Promotions slide lists active walk-in rates from `GET /api/settings/public-rates`. The public response must omit inactive entries and must not require staff authentication.
+5. Change or deactivate a membership package or walk-in rate in **Pricing & plans**, save, then refresh `/` and confirm only active rates appear. Verify the member and staff links open `/member/login` and `/staff/login`.
+6. Check that the single content panel, arm logo mark, rate lists, tabs, and controls remain usable at desktop and mobile widths. Confirm there is no separate oversized illustration panel. From `backend`, run `npm test` to verify public rate filtering and existing pricing behavior.

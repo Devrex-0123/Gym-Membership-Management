@@ -21,7 +21,7 @@ const INITIAL_EXPENSE = {
     vendor: '',
     amount: ''
 };
-const INPUT_CLASS = 'w-full rounded-xl border border-[#173B45]/15 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-[#FF8225] focus:ring-4 focus:ring-[#FF8225]/10';
+const INPUT_CLASS = 'w-full rounded-md border border-neutral-200 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-neutral-400 focus:ring-1 focus:ring-neutral-900';
 
 const formatCurrency = (amount) => `₱${Number(amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatDate = (date) => new Date(`${date}T00:00:00`).toLocaleDateString('en-PH', { dateStyle: 'medium' });
@@ -101,20 +101,18 @@ const ExpenseManagement = () => {
     return (
         <>
             <section>
-                <p className="text-sm font-bold uppercase tracking-[0.17em] text-[#B43F3F]">Admin module</p>
-                <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Expense tracking</h1>
-                <p className="mt-2 text-sm text-[#173B45]/60">Record and browse gym operating expenses.</p>
+                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Expense tracking</h1>
+                <p className="mt-2 text-sm text-neutral-500">Record and browse gym operating expenses.</p>
             </section>
 
-            {success && <p role="status" className="rounded-xl border border-[#173B45]/10 bg-white px-4 py-3 text-sm font-medium text-[#173B45] shadow-sm">{success}</p>}
+            {success && <p role="status" className="rounded-md border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-900">{success}</p>}
 
-            <section className="rounded-2xl border border-[#173B45]/[0.06] bg-white p-5 shadow-sm sm:p-7">
+            <section className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-7">
                 <div className="mb-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B43F3F]">New expense</p>
-                    <h2 className="mt-2 text-xl font-black">Record an expense</h2>
-                    <p className="mt-1 text-sm text-[#173B45]/55">Only admins can add or view expense records.</p>
+                    <h2 className="mt-2 text-xl font-semibold">Record an expense</h2>
+                    <p className="mt-1 text-sm text-neutral-500">Only admins can add or view expense records.</p>
                 </div>
-                {formError && <p role="alert" className="mb-5 rounded-xl border border-[#B43F3F]/20 bg-[#B43F3F]/[0.06] px-4 py-3 text-sm font-medium text-[#B43F3F]">{formError}</p>}
+                {formError && <p role="alert" className="mb-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">{formError}</p>}
                 <form onSubmit={submitExpense} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
                         <label htmlFor="expense-date" className="mb-1.5 block text-sm font-semibold">Expense date</label>
@@ -139,17 +137,17 @@ const ExpenseManagement = () => {
                         <input id="expense-description" required type="text" maxLength={200} value={expenseForm.description} onChange={(event) => setExpenseForm({ ...expenseForm, description: event.target.value })} placeholder="What was this expense for?" className={INPUT_CLASS} />
                     </div>
                     <div className="flex items-end">
-                        <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#FF8225] px-5 py-3 font-bold text-[#173B45] transition hover:bg-[#f77718] disabled:opacity-50">
+                        <button type="submit" disabled={isSubmitting} className="w-full rounded-md bg-neutral-900 text-white px-5 py-3 font-semibold transition hover:bg-neutral-700 disabled:opacity-50">
                             {isSubmitting ? 'Saving…' : 'Save expense'}
                         </button>
                     </div>
                 </form>
             </section>
 
-            <section className="rounded-2xl border border-[#173B45]/[0.06] bg-white p-5 shadow-sm sm:p-7">
+            <section className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-7">
                 <div className="mb-5">
-                    <h2 className="text-lg font-black">Expense history</h2>
-                    <p className="mt-1 text-sm text-[#173B45]/55">Filter recorded expenses by date, category, description, or vendor.</p>
+                    <h2 className="text-lg font-semibold">Expense history</h2>
+                    <p className="mt-1 text-sm text-neutral-500">Filter recorded expenses by date, category, description, or vendor.</p>
                 </div>
                 <form onSubmit={applyFilters} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
@@ -172,56 +170,56 @@ const ExpenseManagement = () => {
                         <input id="expense-search" type="search" maxLength={100} value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} placeholder="Description or vendor" className={INPUT_CLASS} />
                     </div>
                     <div className="flex gap-2 sm:col-span-2 lg:col-span-4">
-                        <button type="submit" className="rounded-xl bg-[#173B45] px-5 py-3 font-bold text-white transition hover:bg-[#214e5a]">Apply filters</button>
-                        <button type="button" onClick={clearFilters} className="rounded-xl border border-[#173B45]/15 px-5 py-3 text-sm font-bold transition hover:border-[#FF8225]">Clear</button>
+                        <button type="submit" className="rounded-md bg-neutral-900 px-5 py-3 font-semibold text-white transition hover:bg-neutral-700">Apply filters</button>
+                        <button type="button" onClick={clearFilters} className="rounded-md border border-neutral-200 px-5 py-3 text-sm font-semibold transition hover:border-neutral-400">Clear</button>
                     </div>
                 </form>
             </section>
 
-            {listError && <p role="alert" className="rounded-xl border border-[#B43F3F]/20 bg-white px-4 py-3 text-sm font-medium text-[#B43F3F] shadow-sm">{listError}</p>}
+            {listError && <p role="alert" className="rounded-md border border-red-200 bg-white px-4 py-3 text-sm font-medium text-red-600">{listError}</p>}
 
-            <section className="overflow-hidden rounded-2xl border border-[#173B45]/[0.06] bg-white shadow-sm">
-                <div className="border-b border-[#173B45]/[0.07] px-5 py-4 sm:px-7">
-                    <h2 className="font-black">Recorded expenses</h2>
-                    <p className="mt-1 text-sm text-[#173B45]/55">{isLoading ? 'Loading…' : `${pagination.total.toLocaleString('en-PH')} expense(s)`}</p>
+            <section className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+                <div className="border-b border-neutral-200 px-5 py-4 sm:px-7">
+                    <h2 className="font-semibold">Recorded expenses</h2>
+                    <p className="mt-1 text-sm text-neutral-500">{isLoading ? 'Loading…' : `${pagination.total.toLocaleString('en-PH')} expense(s)`}</p>
                 </div>
                 {isLoading ? (
-                    <p className="px-5 py-8 text-sm text-[#173B45]/55 sm:px-7">Loading expenses…</p>
+                    <p className="px-5 py-8 text-sm text-neutral-500 sm:px-7">Loading expenses…</p>
                 ) : expenses.length === 0 ? (
-                    <p className="px-5 py-8 text-sm text-[#173B45]/55 sm:px-7">No expenses match these filters.</p>
+                    <p className="px-5 py-8 text-sm text-neutral-500 sm:px-7">No expenses match these filters.</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[850px] text-left text-sm">
-                            <thead className="bg-[#F8EDED]/55 text-xs uppercase tracking-wide text-[#173B45]/55">
+                            <thead className="bg-neutral-50 text-xs text-neutral-500">
                                 <tr>
-                                    <th className="px-5 py-3 font-bold sm:px-7">Date</th>
-                                    <th className="px-5 py-3 font-bold">Category</th>
-                                    <th className="px-5 py-3 font-bold">Description</th>
-                                    <th className="px-5 py-3 font-bold">Vendor</th>
-                                    <th className="px-5 py-3 text-right font-bold">Amount</th>
-                                    <th className="px-5 py-3 text-right font-bold sm:px-7">Recorded by</th>
+                                    <th className="px-5 py-3 font-semibold sm:px-7">Date</th>
+                                    <th className="px-5 py-3 font-semibold">Category</th>
+                                    <th className="px-5 py-3 font-semibold">Description</th>
+                                    <th className="px-5 py-3 font-semibold">Vendor</th>
+                                    <th className="px-5 py-3 text-right font-semibold">Amount</th>
+                                    <th className="px-5 py-3 text-right font-semibold sm:px-7">Recorded by</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#173B45]/[0.06]">
+                            <tbody className="divide-y divide-neutral-200">
                                 {expenses.map((expense) => (
-                                    <tr key={expense._id} className="hover:bg-[#F8EDED]/25">
-                                        <td className="whitespace-nowrap px-5 py-4 text-[#173B45]/65 sm:px-7">{formatDate(expense.expense_date)}</td>
+                                    <tr key={expense._id} className="hover:bg-neutral-100">
+                                        <td className="whitespace-nowrap px-5 py-4 text-neutral-500 sm:px-7">{formatDate(expense.expense_date)}</td>
                                         <td className="whitespace-nowrap px-5 py-4 capitalize font-semibold">{expense.category}</td>
                                         <td className="px-5 py-4">{expense.description}</td>
-                                        <td className="whitespace-nowrap px-5 py-4 text-[#173B45]/65">{expense.vendor || '—'}</td>
-                                        <td className="whitespace-nowrap px-5 py-4 text-right font-black">{formatCurrency(expense.amount)}</td>
-                                        <td className="whitespace-nowrap px-5 py-4 text-right text-[#173B45]/65 sm:px-7">{expense.recorded_by?.full_name || 'Unknown'}</td>
+                                        <td className="whitespace-nowrap px-5 py-4 text-neutral-500">{expense.vendor || '—'}</td>
+                                        <td className="whitespace-nowrap px-5 py-4 text-right font-semibold">{formatCurrency(expense.amount)}</td>
+                                        <td className="whitespace-nowrap px-5 py-4 text-right text-neutral-500 sm:px-7">{expense.recorded_by?.full_name || 'Unknown'}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
                 )}
-                <div className="flex items-center justify-between gap-3 border-t border-[#173B45]/[0.07] px-5 py-4 sm:px-7">
-                    <p className="text-sm text-[#173B45]/55">Page {page} of {Math.max(pagination.totalPages, 1)}</p>
+                <div className="flex items-center justify-between gap-3 border-t border-neutral-200 px-5 py-4 sm:px-7">
+                    <p className="text-sm text-neutral-500">Page {page} of {Math.max(pagination.totalPages, 1)}</p>
                     <div className="flex gap-2">
-                        <button type="button" disabled={isLoading || page <= 1} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-[#173B45]/15 px-3 py-2 text-sm font-semibold disabled:opacity-40">Previous</button>
-                        <button type="button" disabled={isLoading || page >= pagination.totalPages} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-[#173B45]/15 px-3 py-2 text-sm font-semibold disabled:opacity-40">Next</button>
+                        <button type="button" disabled={isLoading || page <= 1} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold disabled:opacity-40">Previous</button>
+                        <button type="button" disabled={isLoading || page >= pagination.totalPages} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold disabled:opacity-40">Next</button>
                     </div>
                 </div>
             </section>

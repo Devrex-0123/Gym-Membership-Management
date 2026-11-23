@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import API from '../utils/api';
+import BrandLogo from '../components/BrandLogo';
 
 const getMembershipStatus = (member) => {
     if (!member?.expiry_date || member.membership_status === 'none') {
         return {
             label: 'No active membership',
             detail: 'Visit the front desk to choose a membership package.',
-            className: 'bg-[#173B45]/[0.08] text-[#173B45]/75'
+            className: 'border-neutral-300 text-neutral-700'
         };
     }
 
@@ -22,20 +23,20 @@ const getMembershipStatus = (member) => {
         return {
             label: 'Membership expired',
             detail: 'Renew at the front desk to continue your membership.',
-            className: 'bg-[#B43F3F]/10 text-[#B43F3F]'
+            className: 'border-red-200 text-red-700'
         };
     }
     if (daysRemaining <= 7) {
         return {
             label: 'Expiring soon',
             detail: daysRemaining === 0 ? 'Your membership expires today.' : `${daysRemaining} day(s) remaining. Plan your renewal soon.`,
-            className: 'bg-[#FF8225]/15 text-[#9A4A0C]'
+            className: 'border-neutral-900 text-neutral-900'
         };
     }
     return {
         label: 'Active membership',
-        detail: `${daysRemaining} days remaining. Keep showing up.`,
-        className: 'bg-[#173B45]/10 text-[#173B45]'
+        detail: `${daysRemaining} days remaining..`,
+        className: 'border-neutral-300 text-neutral-900'
     };
 };
 
@@ -90,112 +91,91 @@ const MemberDashboard = () => {
     const status = getMembershipStatus(member);
 
     return (
-        <div className="min-h-screen bg-[#F8EDED] text-[#173B45]">
-            <header className="bg-[#173B45] text-white shadow-lg shadow-[#173B45]/10">
-                <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-8">
-                    <div className="flex items-center gap-3">
-                        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#FF8225] font-black text-[#173B45]">GY</div>
-                        <div>
-                            <p className="font-bold tracking-tight">Forge Fitness</p>
-                            <p className="text-xs text-white/55">Member portal</p>
-                        </div>
-                    </div>
-                    <button onClick={handleLogout} className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold transition hover:border-[#FF8225] hover:bg-white/5">
+        <div className="min-h-screen bg-white text-neutral-900">
+            <header className="border-b border-neutral-200">
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
+                    <BrandLogo subtitle="Member portal" />
+                    <button type="button" onClick={handleLogout} className="text-sm text-neutral-500 transition-colors hover:text-neutral-900">
                         Log out
                     </button>
                 </div>
             </header>
 
-            <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-8 sm:py-9">
-                <section className="relative overflow-hidden rounded-[1.75rem] bg-[#173B45] px-6 py-7 text-white shadow-xl shadow-[#173B45]/10 sm:px-9 sm:py-9">
-                    <div className="absolute -right-10 -top-20 h-64 w-64 rounded-full border-[42px] border-white/[0.06]" />
-                    <div className="relative">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#FFB276]">Your membership</p>
-                        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-                            {isLoading ? 'Loading your member space…' : `Hey${member?.first_name ? `, ${member.first_name}` : ''}.`}
-                        </h1>
-                        <p className="mt-2 text-sm text-white/60">Your gym ID and membership details, ready whenever you need them.</p>
-                    </div>
+            <main className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
+                <section>
+                    <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                        {isLoading ? 'Loading…' : `Hi${member?.first_name ? `, ${member.first_name}` : ''}.`}
+                    </h1>
+                    <p className="mt-2 text-sm text-neutral-500">Your gym ID and membership details.</p>
                 </section>
 
-                {error && <p role="alert" className="rounded-xl border border-[#B43F3F]/20 bg-white px-4 py-3 text-sm font-medium text-[#B43F3F] shadow-sm">{error}</p>}
+                {error && <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
                 {isLoading ? (
-                    <div className="grid gap-6 md:grid-cols-[1fr_0.85fr]">
-                        <div className="h-64 animate-pulse rounded-2xl bg-white/70" />
-                        <div className="h-64 animate-pulse rounded-2xl bg-white/70" />
+                    <div className="grid gap-6 md:grid-cols-[1fr_0.8fr]">
+                        <div className="h-64 animate-pulse rounded-lg bg-neutral-100" />
+                        <div className="h-64 animate-pulse rounded-lg bg-neutral-100" />
                     </div>
                 ) : member && (
                     <>
-                        <section className="grid gap-6 md:grid-cols-[1fr_0.85fr]">
-                            <article className="rounded-2xl border border-[#173B45]/[0.06] bg-white p-6 shadow-sm sm:p-8">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B43F3F]">Member profile</p>
-                                        <h2 className="mt-2 text-2xl font-black">{member.full_name}</h2>
-                                        <p className="mt-1 text-sm text-[#173B45]/55">{member.phone}</p>
+                        <section className="grid gap-6 md:grid-cols-[1fr_0.8fr]">
+                            <article className="rounded-lg border border-neutral-200 p-6 sm:p-8">
+                                <h2 className="text-xl font-semibold">{member.full_name}</h2>
+                                <p className="mt-1 text-sm text-neutral-500">{member.phone}</p>
+
+                                <dl className="mt-8 divide-y divide-neutral-200 border-y border-neutral-200 text-sm">
+                                    <div className="flex items-center justify-between gap-4 py-3">
+                                        <dt className="text-neutral-500">Member code</dt>
+                                        <dd className="font-mono font-medium">{member.member_code}</dd>
                                     </div>
-                                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#FF8225]/15 text-lg font-black text-[#B43F3F]">
-                                        {member.first_name.charAt(0)}{member.last_name.charAt(0)}
-                                    </span>
-                                </div>
-
-                                <div className="mt-7 rounded-xl bg-[#F8EDED]/60 p-4">
-                                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#173B45]/45">Member code</p>
-                                    <p className="mt-1 font-mono text-xl font-black tracking-wide">{member.member_code}</p>
-                                </div>
-
-                                <div className="mt-5">
-                                    <span className={`inline-flex rounded-full px-3 py-1.5 text-sm font-bold ${status.className}`}>{status.label}</span>
-                                    <p className="mt-3 text-sm leading-6 text-[#173B45]/60">{status.detail}</p>
-                                </div>
-
-                                <div className="mt-6 border-t border-[#173B45]/[0.07] pt-5">
-                                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#173B45]/45">Membership expiry</p>
-                                    <p className="mt-1 text-lg font-bold">{formatDate(member.expiry_date)}</p>
-                                </div>
+                                    <div className="flex items-center justify-between gap-4 py-3">
+                                        <dt className="text-neutral-500">Status</dt>
+                                        <dd>
+                                            <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${status.className}`}>{status.label}</span>
+                                        </dd>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 py-3">
+                                        <dt className="text-neutral-500">Expires</dt>
+                                        <dd className="font-medium">{formatDate(member.expiry_date)}</dd>
+                                    </div>
+                                </dl>
+                                <p className="mt-4 text-sm text-neutral-500">{status.detail}</p>
                             </article>
 
-                            <article className="flex flex-col items-center rounded-2xl border border-[#173B45]/[0.06] bg-white p-6 text-center shadow-sm sm:p-8">
-                                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#B43F3F]">Digital gym ID</p>
-                                <h2 className="mt-2 text-xl font-black">Scan at the front desk</h2>
-                                <p className="mt-1 text-sm text-[#173B45]/55">Show this code when you visit.</p>
-                                <div className="mt-5 rounded-2xl border border-[#173B45]/[0.07] bg-white p-3">
+                            <article className="flex flex-col items-center rounded-lg border border-neutral-200 p-6 text-center sm:p-8">
+                                <h2 className="font-semibold">Gym ID</h2>
+                                <p className="mt-1 text-sm text-neutral-500">Show this at the front desk.</p>
+                                <div className="mt-6">
                                     <QRCodeSVG value={member.member_code} size={196} level="M" includeMargin />
                                 </div>
-                                <p className="mt-3 text-xs text-[#173B45]/45">This QR code contains your member ID only.</p>
+                                <p className="mt-3 text-xs text-neutral-400">Contains your member ID only.</p>
                             </article>
                         </section>
 
-                        <section className="overflow-hidden rounded-2xl border border-[#173B45]/[0.06] bg-white shadow-sm">
-                            <div className="flex items-center justify-between gap-3 border-b border-[#173B45]/[0.07] px-5 py-4 sm:px-7">
-                                <div>
-                                    <h2 className="font-black">Recent visits</h2>
-                                    <p className="mt-1 text-sm text-[#173B45]/55">Your latest 20 recorded check-ins</p>
-                                </div>
-                                <span className="rounded-full bg-[#F8EDED] px-3 py-1 text-xs font-bold text-[#B43F3F]">ATTENDANCE</span>
+                        <section>
+                            <div className="flex items-end justify-between gap-3 border-b border-neutral-200 pb-3">
+                                <h2 className="font-semibold">Recent visits</h2>
+                                <p className="text-sm text-neutral-500">Last 20 check-ins</p>
                             </div>
                             {attendanceError ? (
-                                <p role="alert" className="m-5 rounded-xl bg-[#B43F3F]/[0.07] px-4 py-3 text-sm text-[#B43F3F]">{attendanceError}</p>
+                                <p role="alert" className="py-6 text-sm text-red-700">{attendanceError}</p>
                             ) : isAttendanceLoading ? (
-                                <p className="px-5 py-6 text-sm text-[#173B45]/55 sm:px-7">Loading your visits…</p>
+                                <p className="py-6 text-sm text-neutral-500">Loading your visits…</p>
                             ) : attendance.length === 0 ? (
-                                <p className="px-5 py-6 text-sm text-[#173B45]/55 sm:px-7">Your check-ins will appear here after your first visit.</p>
+                                <p className="py-6 text-sm text-neutral-500">Your check-ins will appear here after your first visit.</p>
                             ) : (
-                                <ul className="divide-y divide-[#173B45]/[0.06]">
+                                <ul className="divide-y divide-neutral-200">
                                     {attendance.map((visit) => (
-                                        <li key={visit._id} className="flex items-center justify-between gap-4 px-5 py-4 sm:px-7">
-                                            <div>
-                                                <p className="font-semibold">{visit.attendance_date}</p>
-                                            </div>
-                                            <p className="text-sm font-bold">{new Date(visit.createdAt).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })}</p>
+                                        <li key={visit._id} className="flex items-center justify-between gap-4 py-3 text-sm">
+                                            <span>{visit.attendance_date}</span>
+                                            <span className="tabular-nums text-neutral-500">{new Date(visit.createdAt).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })}</span>
                                         </li>
                                     ))}
                                 </ul>
                             )}
                         </section>
 
-                        <p className="text-center text-xs text-[#173B45]/45">Need help? Ask the front desk to update your account or membership.</p>
+                        <p className="text-xs text-neutral-400">Need to update your account? Ask at the front desk.</p>
                     </>
                 )}
             </main>
