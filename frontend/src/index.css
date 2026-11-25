@@ -22,3 +22,29 @@ input,
 select {
   font: inherit;
 }
+
+@keyframes pricing-marquee-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.pricing-marquee__track {
+  animation: pricing-marquee-scroll 32s linear infinite;
+}
+
+.pricing-marquee:hover .pricing-marquee__track,
+.pricing-marquee:focus-within .pricing-marquee__track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-marquee {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pricing-marquee::-webkit-scrollbar {
+    display: none;
+  }
+}

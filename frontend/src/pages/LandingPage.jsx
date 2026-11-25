@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../utils/api';
 import BrandLogo from '../components/BrandLogo';
+import gymPromotion from '../assets/Black & Yellow Minimalist Fitness & Gym Promotion Instagram Post.png';
+import trainingPromotion from '../assets/Black & Yellow Minimalist Fitness & Gym Promotion Instagram Post (1).png';
+import memberPromotion from '../assets/Black & Yellow Minimalist Fitness & Gym Promotion Instagram Post (2).png';
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('en-PH', {
@@ -13,6 +16,18 @@ const formatPrice = (price) =>
 const RATE_TABS = [
     { id: 'memberships', label: 'Memberships' },
     { id: 'walkin', label: 'Day passes' },
+];
+
+const CAROUSEL_IMAGES = [
+    { src: gymPromotion, alt: 'NexGym promotion featuring strength training' },
+    { src: trainingPromotion, alt: 'NexGym promotion featuring a member training' },
+    { src: memberPromotion, alt: 'NexGym promotion inviting members to start training' },
+];
+
+const CAROUSEL_TRACK_IMAGES = [
+    CAROUSEL_IMAGES[CAROUSEL_IMAGES.length - 1],
+    ...CAROUSEL_IMAGES,
+    CAROUSEL_IMAGES[0],
 ];
 
 const RateList = ({ items, isLoading, error, emptyMessage, getName, getDetail }) => {
@@ -61,9 +76,69 @@ const RateList = ({ items, isLoading, error, emptyMessage, getName, getDetail })
 
 const LandingPage = () => {
     const [rateTab, setRateTab] = useState('memberships');
+    const [trackIndex, setTrackIndex] = useState(1);
+    const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
     const [rates, setRates] = useState({ membership_rates: [], walk_in_rates: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const tickerItems = [
+        ...rates.membership_rates.map((plan) => ({
+            id: `membership-${plan.package_name}`,
+            label: plan.package_name,
+            detail: `${plan.duration_days} days`,
+            price: plan.price,
+        })),
+        ...rates.walk_in_rates.map((rate) => ({
+            id: `day-pass-${rate.category_name}`,
+            label: `${rate.category_name} Day Pass`,
+            detail: '',
+            price: rate.price,
+        })),
+    ];
+
+    const activeSlide = (trackIndex - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length;
+
+    const moveSlide = (direction) => {
+        setTrackIndex((current) => current + direction);
+    };
+
+    const showSlide = (index) => {
+        const forwardDistance = (index - activeSlide + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length;
+        if (forwardDistance === 0) {
+            return;
+        }
+
+        const distance = forwardDistance <= CAROUSEL_IMAGES.length / 2
+            ? forwardDistance
+            : forwardDistance - CAROUSEL_IMAGES.length;
+        setTrackIndex((current) => current + distance);
+    };
+
+    const handleCarouselTransitionEnd = (event) => {
+        if (event.propertyName !== 'transform') {
+            return;
+        }
+
+        if (trackIndex === 0 || trackIndex === CAROUSEL_IMAGES.length + 1) {
+            const resetIndex = trackIndex === 0 ? CAROUSEL_IMAGES.length : 1;
+            setIsTransitionEnabled(false);
+            setTrackIndex(resetIndex);
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => setIsTransitionEnabled(true));
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (!isAutoPlaying) {
+            return undefined;
+        }
+
+        const timer = window.setTimeout(() => setTrackIndex((current) => current + 1), 5000);
+        return () => window.clearTimeout(timer);
+    }, [trackIndex, isAutoPlaying]);
 
     useEffect(() => {
         let isMounted = true;
@@ -96,6 +171,35 @@ const LandingPage = () => {
 
     return (
         <div className="flex min-h-screen flex-col bg-white text-neutral-900 selection:bg-neutral-900 selection:text-white">
+            {tickerItems.length > 0 && (
+                <div
+                    className="pricing-marquee sticky top-0 z-30 overflow-hidden bg-neutral-900 py-3 text-white"
+                    role="region"
+                    aria-label="Current membership and day-pass prices"
+                >
+                    <div className="pricing-marquee__track flex w-max items-center">
+                        {[false, true].map((isDuplicate) => (
+                            <ul
+                                key={isDuplicate ? 'duplicate' : 'prices'}
+                                className={`flex min-w-[100vw] shrink-0 items-center justify-around gap-8 px-4 ${
+                                    isDuplicate ? 'pricing-marquee__duplicate' : ''
+                                }`}
+                                aria-hidden={isDuplicate}
+                            >
+                                {tickerItems.map((item) => (
+                                    <li key={`${isDuplicate ? 'duplicate-' : ''}${item.id}`} className="flex items-center gap-8 whitespace-nowrap">
+                                        <span className="text-amber-300" aria-hidden="true">◆</span>
+                                        <span className="font-medium">{item.label}</span>
+                                        {item.detail && <span className="text-sm text-neutral-300">{item.detail}</span>}
+                                        <span className="tabular-nums">{formatPrice(item.price)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
                 <Link to="/" aria-label="NexGym home">
                     <BrandLogo />
@@ -110,8 +214,8 @@ const LandingPage = () => {
                 </nav>
             </header>
 
-            <main className="mx-auto grid w-full max-w-7xl flex-1 gap-16 px-6 lg:grid-cols-12 lg:gap-20 lg:px-10">
-                <section className="pt-16 sm:pt-24 lg:col-span-6 lg:pb-24 lg:pt-32">
+            <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 content-start gap-y-16 px-6 pb-16 lg:grid-cols-2 lg:items-center lg:gap-x-20 lg:gap-y-20 lg:px-10">
+                <section className="pt-12 sm:pt-16 lg:pt-20">
                     <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">Train at NexGym.</h1>
                     <p className="mt-5 max-w-md text-lg leading-relaxed text-neutral-500">
                         Memberships and day passes. Sign up and renew at the front desk.
@@ -124,7 +228,92 @@ const LandingPage = () => {
                     </Link>
                 </section>
 
-                <section aria-labelledby="rates-heading" className="pb-24 lg:col-span-6 lg:pt-32">
+                <section
+                    role="region"
+                    aria-roledescription="carousel"
+                    aria-label="NexGym promotional images"
+                    aria-live={isAutoPlaying ? 'off' : 'polite'}
+                    className="w-full"
+                >
+                    <h2 className="sr-only">Facility overview</h2>
+                    <div className="relative mx-auto max-w-md px-3 py-4">
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-5 rotate-3 rounded-2xl bg-neutral-200 shadow-md" />
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-3 -rotate-2 rounded-2xl bg-white shadow-lg" />
+                        <div className="relative z-10 overflow-hidden rounded-2xl border-[8px] border-white bg-white shadow-xl">
+                            <div
+                                onTransitionEnd={handleCarouselTransitionEnd}
+                                className={`flex ${isTransitionEnabled ? 'transition-transform duration-500 ease-in-out' : ''}`}
+                                style={{ transform: `translateX(-${trackIndex * 100}%)` }}
+                            >
+                                {CAROUSEL_TRACK_IMAGES.map((image, index) => {
+                                    const slideIndex = (index - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length;
+                                    return (
+                                        <div
+                                            key={`${image.src}-${index}`}
+                                            role="group"
+                                            aria-roledescription="slide"
+                                            aria-label={`${slideIndex + 1} of ${CAROUSEL_IMAGES.length}`}
+                                            aria-hidden={index !== trackIndex}
+                                            className="w-full shrink-0"
+                                        >
+                                            <img
+                                                src={image.src}
+                                                alt={image.alt}
+                                                className="aspect-[4/5] w-full object-cover"
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between gap-4">
+                            <button
+                                type="button"
+                                onClick={() => moveSlide(-1)}
+                                aria-label="Show previous image"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-xl transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                            >
+                                <span aria-hidden="true">&larr;</span>
+                            </button>
+
+                            <div role="group" aria-label="Choose image" className="flex items-center justify-center gap-2">
+                                {CAROUSEL_IMAGES.map((image, index) => (
+                                    <button
+                                        key={image.src}
+                                        type="button"
+                                        onClick={() => showSlide(index)}
+                                        aria-label={`Show image ${index + 1}`}
+                                        aria-current={activeSlide === index ? 'true' : undefined}
+                                        className={`h-3 w-3 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 ${
+                                            activeSlide === index ? 'bg-neutral-900' : 'bg-neutral-300 hover:bg-neutral-500'
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsAutoPlaying((playing) => !playing)}
+                                aria-label={isAutoPlaying ? 'Pause slideshow' : 'Play slideshow'}
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-sm transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                            >
+                                <span aria-hidden="true">{isAutoPlaying ? 'Ⅱ' : '▶'}</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => moveSlide(1)}
+                                aria-label="Show next image"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-xl transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                            >
+                                <span aria-hidden="true">&rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section aria-labelledby="rates-heading" className="w-full lg:col-span-2">
                     <div className="flex flex-wrap items-end justify-between gap-4 border-b border-neutral-200 pb-3">
                         <h2 id="rates-heading" className="text-sm font-medium text-neutral-500">
                             Rates
