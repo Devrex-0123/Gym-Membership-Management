@@ -24,12 +24,6 @@ const CAROUSEL_IMAGES = [
     { src: memberPromotion, alt: 'NexGym promotion inviting members to start training' },
 ];
 
-const CAROUSEL_TRACK_IMAGES = [
-    CAROUSEL_IMAGES[CAROUSEL_IMAGES.length - 1],
-    ...CAROUSEL_IMAGES,
-    CAROUSEL_IMAGES[0],
-];
-
 const RateList = ({ items, isLoading, error, emptyMessage, getName, getDetail }) => {
     if (isLoading) {
         return (
@@ -76,8 +70,8 @@ const RateList = ({ items, isLoading, error, emptyMessage, getName, getDetail })
 
 const LandingPage = () => {
     const [rateTab, setRateTab] = useState('memberships');
-    const [trackIndex, setTrackIndex] = useState(1);
-    const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+    const [activeSlide, setActiveSlide] = useState(0);
+    const [slideDirection, setSlideDirection] = useState('next');
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
     const [rates, setRates] = useState({ membership_rates: [], walk_in_rates: [] });
     const [isLoading, setIsLoading] = useState(true);
@@ -98,10 +92,9 @@ const LandingPage = () => {
         })),
     ];
 
-    const activeSlide = (trackIndex - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length;
-
     const moveSlide = (direction) => {
-        setTrackIndex((current) => current + direction);
+        setSlideDirection(direction > 0 ? 'next' : 'previous');
+        setActiveSlide((current) => (current + direction + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length);
     };
 
     const showSlide = (index) => {
@@ -110,25 +103,9 @@ const LandingPage = () => {
             return;
         }
 
-        const distance = forwardDistance <= CAROUSEL_IMAGES.length / 2
-            ? forwardDistance
-            : forwardDistance - CAROUSEL_IMAGES.length;
-        setTrackIndex((current) => current + distance);
-    };
-
-    const handleCarouselTransitionEnd = (event) => {
-        if (event.propertyName !== 'transform') {
-            return;
-        }
-
-        if (trackIndex === 0 || trackIndex === CAROUSEL_IMAGES.length + 1) {
-            const resetIndex = trackIndex === 0 ? CAROUSEL_IMAGES.length : 1;
-            setIsTransitionEnabled(false);
-            setTrackIndex(resetIndex);
-            window.requestAnimationFrame(() => {
-                window.requestAnimationFrame(() => setIsTransitionEnabled(true));
-            });
-        }
+        const distance = forwardDistance <= CAROUSEL_IMAGES.length / 2 ? forwardDistance : forwardDistance - CAROUSEL_IMAGES.length;
+        setSlideDirection(distance > 0 ? 'next' : 'previous');
+        setActiveSlide(index);
     };
 
     useEffect(() => {
@@ -136,9 +113,12 @@ const LandingPage = () => {
             return undefined;
         }
 
-        const timer = window.setTimeout(() => setTrackIndex((current) => current + 1), 5000);
+        const timer = window.setTimeout(() => {
+            setSlideDirection('next');
+            setActiveSlide((current) => (current + 1) % CAROUSEL_IMAGES.length);
+        }, 5000);
         return () => window.clearTimeout(timer);
-    }, [trackIndex, isAutoPlaying]);
+    }, [activeSlide, isAutoPlaying]);
 
     useEffect(() => {
         let isMounted = true;
@@ -240,30 +220,30 @@ const LandingPage = () => {
                         <div aria-hidden="true" className="pointer-events-none absolute inset-5 rotate-3 rounded-2xl bg-neutral-200 shadow-md" />
                         <div aria-hidden="true" className="pointer-events-none absolute inset-3 -rotate-2 rounded-2xl bg-white shadow-lg" />
                         <div className="relative z-10 overflow-hidden rounded-2xl border-[8px] border-white bg-white shadow-xl">
-                            <div
-                                onTransitionEnd={handleCarouselTransitionEnd}
-                                className={`flex ${isTransitionEnabled ? 'transition-transform duration-500 ease-in-out' : ''}`}
-                                style={{
-                                    width: `${CAROUSEL_TRACK_IMAGES.length * 100}%`,
-                                    transform: `translateX(-${trackIndex * (100 / CAROUSEL_TRACK_IMAGES.length)}%)`,
-                                }}
-                            >
-                                {CAROUSEL_TRACK_IMAGES.map((image, index) => {
-                                    const slideIndex = (index - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length;
+                            <div className="relative aspect-[4/5]">
+                                {CAROUSEL_IMAGES.map((image, index) => {
+                                    const position = index === activeSlide
+                                        ? 0
+                                        : index === (activeSlide + 1) % CAROUSEL_IMAGES.length
+                                            ? 100
+                                            : -100;
                                     return (
                                         <div
-                                            key={`${image.src}-${index}`}
+                                            key={image.src}
                                             role="group"
                                             aria-roledescription="slide"
-                                            aria-label={`${slideIndex + 1} of ${CAROUSEL_IMAGES.length}`}
-                                            aria-hidden={index !== trackIndex}
-                                            className="min-w-0 shrink-0"
-                                            style={{ width: `${100 / CAROUSEL_TRACK_IMAGES.length}%` }}
+                                            aria-label={`${index + 1} of ${CAROUSEL_IMAGES.length}`}
+                                            aria-hidden={index !== activeSlide}
+                                            className="carousel-slide absolute inset-0"
+                                            style={{ transform: `translateX(${position}%)` }}
                                         >
                                             <img
                                                 src={image.src}
                                                 alt={image.alt}
-                                                className="aspect-[4/5] w-full object-cover"
+                                                loading="eager"
+                                                className={`h-full w-full object-cover ${
+                                                    index === activeSlide ? `album-slide--${slideDirection}` : ''
+                                                }`}
                                             />
                                         </div>
                                     );
