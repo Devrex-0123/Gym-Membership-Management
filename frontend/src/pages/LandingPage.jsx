@@ -243,7 +243,10 @@ const LandingPage = () => {
                             <div
                                 onTransitionEnd={handleCarouselTransitionEnd}
                                 className={`flex ${isTransitionEnabled ? 'transition-transform duration-500 ease-in-out' : ''}`}
-                                style={{ transform: `translateX(-${trackIndex * 100}%)` }}
+                                style={{
+                                    width: `${CAROUSEL_TRACK_IMAGES.length * 100}%`,
+                                    transform: `translateX(-${trackIndex * (100 / CAROUSEL_TRACK_IMAGES.length)}%)`,
+                                }}
                             >
                                 {CAROUSEL_TRACK_IMAGES.map((image, index) => {
                                     const slideIndex = (index - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length;
@@ -254,7 +257,8 @@ const LandingPage = () => {
                                             aria-roledescription="slide"
                                             aria-label={`${slideIndex + 1} of ${CAROUSEL_IMAGES.length}`}
                                             aria-hidden={index !== trackIndex}
-                                            className="w-full shrink-0"
+                                            className="min-w-0 shrink-0"
+                                            style={{ width: `${100 / CAROUSEL_TRACK_IMAGES.length}%` }}
                                         >
                                             <img
                                                 src={image.src}
